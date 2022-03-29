@@ -12,17 +12,21 @@ class URLSearchSpider(scrapy.Spider):
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
-    def is_interesting(self, link, link_text, footer_links):
+    def is_interesting(self, link, link_text, footer_links,domain):
 
         if link_text != None:
             link_text = link_text.lower()
 
         # Keywords to search for in the URL's text and URL
-        keywords = ['sustainability', 'report' , 'green' , 'asr','csr']
+        keywords = ['sustainability', 'report']
 
         if link is None or link in footer_links:
             return False
         
+        #Checking if domain is subdomain of main parent
+        if domain not in link:
+            return False
+            
         # Checking only for .pdf files. Can be modified for any other inputs
         elif link.endswith('.pdf'):
             for k in keywords:
@@ -77,7 +81,7 @@ class URLSearchSpider(scrapy.Spider):
             if self.is_relative(link):
                 link = response.urljoin(link)
 
-            if self.is_interesting(link, link_text, full_footer_links):
+            if self.is_interesting(link, link_text, full_footer_links,domain):
                 to_save.append({
                     'link': link,
                     'link_text': link_text,
